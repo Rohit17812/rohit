@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+  <meta name="theme-color" content="#2e7d32" />
+  <title>Online Grocery Shop</title>
+  <style>
+    :root{--brand:#2e7d32;--muted:#6b7280}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial;color:#111;background:#f3f6fb;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+    header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--brand);color:#fff;position:sticky;top:0;z-index:20}
+    h1{font-size:18px;margin:0}
+    main{max-width:1100px;margin:18px auto;padding:0 16px}
+    .grid{display:grid;grid-template-columns:1fr;gap:12px}
+    @media(min-width:900px){.grid{grid-template-columns:2fr 1fr}}
+    .card{background:#fff;border-radius:12px;padding:14px;box-shadow:0 10px 24px rgba(16,24,40,0.06)}
+    .btn{display:inline-block;background:var(--brand);color:#fff;padding:10px 14px;border-radius:10px;border:none;text-decoration:none;cursor:pointer}
+    .small{font-size:13px;color:var(--muted)}
+    .listings{display:grid;gap:10px}
+    .item{display:flex;gap:12px;align-items:center;border-radius:10px;padding:10px;border:1px solid #eef2f7}
+    .item img{width:84px;height:84px;object-fit:cover;border-radius:8px}
+    label{display:block;margin:8px 0;font-weight:600}
+    input,select,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid #e6e9ef}
+    footer{text-align:center;padding:18px 8px;color:var(--muted);font-size:13px}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Online Grocery Shop</h1>
+    <nav><a class="btn" href="#create">Add Item</a></nav>
+  </header>
+
+  <main>
+    <div class="grid">
+      <section class="card">
+        <h4>Search groceries</h4>
+        <form id="searchForm">
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <input id="q" placeholder="Search fruits, vegetables, snacks..." />
+            <select id="category">
+              <option value="">All categories</option>
+              <option>Fruits</option>Bananas
+              <option>Vegetables</option>
+              <option>Dairy</option>
+              <option>Beverages</option>
+              <option>Snacks</option>
+              <option>Bakery</option>
+              <option>Frozen</option>
+            </select>
+            <button class="btn" type="button" id="searchBtn">Search</button>
+          </div>
+        </form>
+
+        <h3 style="margin-top:14px">Available Items</h3>
+        <div id="listings" class="listings"></div>
+      </section>
+
+      <aside class="card">
+        <h3>Shop Features</h3>
+        <ul>
+          <li>Fresh groceries delivered to your door.</li>
+          <li>Easy search and category filters.</li>
+          <li>Secure checkout and multiple payment options.</li>
+        </ul>
+      </aside>
+    </div>
+
+    <section id="create" class="card" style="margin-top:12px">
+      <h2>Add Grocery Item</h2>
+      <form id="itemForm">
+        <label for="title">Item Name</label>
+        <input id="title" placeholder="e.g. Fresh Bananas" required />
+
+        <label for="price">Price (USD)</label>
+        <input id="price" type="number" placeholder="e.g. 2.99" required />
+
+        <label for="categorySelect">Category</label>
+        <select id="categorySelect">
+          <option>Fruits</option>
+          <option>Vegetables</option>
+          <option>Dairy</option>
+          <option>Beverages</option>
+          <option>Snacks</option>
+          <option>Bakery</option>
+          <option>Frozen</option>
+        </select>
+
+        <label for="photos">Photo URLs (comma separated)</label>
+        <input id="photos" placeholder="https://... , https://..." />
+
+        <label for="desc">Description</label>
+        <textarea id="desc" rows="3" placeholder="Add details — weight, origin, freshness"></textarea>
+
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="btn" type="button" id="postBtn">Post Item</button>
+          <span id="status" class="small"></span>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    Simple grocery shop demo — integrate with backend and payment gateway for production.
+  </footer>
+
+  <script>
+    const listingsEl = document.getElementById('listings');
+    const postBtn = document.getElementById('postBtn');
+    const searchBtn = document.getElementById('searchBtn');
+    const status = document.getElementById('status');
+
+    function loadListings(){ return JSON.parse(localStorage.getItem('grocery-items') || '[]'); }
+    function saveListings(arr){ localStorage.setItem('grocery-items', JSON.stringify(arr)); }
+
+    function render(list){
+      listingsEl.innerHTML = '';
+      if(!list.length) return listingsEl.innerHTML = '<p class="small">No items available</p>';
+      list.forEach(l=>{
+        const el = document.createElement('div'); el.className='item';
+        const img = document.createElement('img'); img.src = (l.photos && l.photos[0]) || 'https://via.placeholder.com/84';
+        const bd = document.createElement('div');
+        bd.innerHTML = `<strong>${escapeHtml(l.title)}</strong><div class=\"small\">$${escapeHtml(l.price)} — ${escapeHtml(l.category)}</div><div class=\"small\">${escapeHtml(l.desc || '')}</div>`;
+        el.appendChild(img); el.appendChild(bd);
+        listingsEl.appendChild(el);
+      });
+    }
+
+    function escapeHtml(s){ if(!s) return ''; return String(s).replace(/[&<>\"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]||c)); }
+
+    render(loadListings());
+
+    postBtn.addEventListener('click', ()=>{
+      const title = document.getElementById('title').value.trim();
+      const price = document.getElementById('price').value.trim();
+      const category = document.getElementById('categorySelect').value;
+      const photos = document.getElementById('photos').value.split(',').map(s=>s.trim()).filter(Boolean);
+      const desc = document.getElementById('desc').value.trim();
+      if(!title || !price) return alert('Item name and price are required');
+      const arr = loadListings();
+      arr.unshift({title,price,category,photos,desc});
+      saveListings(arr);
+      render(arr);
+      status.textContent='Item added ✓';
+      setTimeout(()=>status.textContent='',1500);
+      document.getElementById('itemForm').reset();
+    });
+
+    searchBtn.addEventListener('click', ()=>{
+      const q = (document.getElementById('q').value||'').toLowerCase();
+      const cat = (document.getElementById('category').value||'').toLowerCase();
+      const arr = loadListings().filter(l=>{
+        return (!cat || l.category.toLowerCase().includes(cat)) && (!q || l.title.toLowerCase().includes(q) || (l.desc||'').toLowerCase().includes(q));
+      });
+      render(arr);
+    });
+  </script>
+</body>
+</html>
