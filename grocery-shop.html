@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Grocery Shop</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f7fa;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #4caf50;
+      color: white;
+      text-align: center;
+      padding: 1rem 0;
+    }
+    .container {
+      width: 90%;
+      max-width: 900px;
+      margin: 2rem auto;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 2rem;
+    }
+    h2 {
+      color: #333;
+      margin-top: 0;
+    }
+    .products {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .product {
+      flex: 1 1 200px;
+      background: #f9f9f9;
+      border-radius: 6px;
+      padding: 1rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+      text-align: center;
+    }
+    .product img {
+      max-width: 100px;
+      height: auto;
+      margin-bottom: 0.5rem;
+    }
+    .product-name {
+      font-weight: bold;
+      margin: 0.5rem 0;
+    }
+    .product-price {
+      color: #4caf50;
+      font-size: 1.1em;
+      margin-bottom: 0.7rem;
+    }
+    .add-to-cart {
+      background: #4caf50;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .cart {
+      margin-top: 2rem;
+      border-top: 1px solid #eee;
+      padding-top: 1rem;
+    }
+    .cart-items {
+      list-style: none;
+      padding: 0;
+    }
+    .cart-items li {
+      margin: 0.5em 0;
+      font-size: 1em;
+    }
+    .total {
+      font-weight: bold;
+      font-size: 1.2em;
+      color: #333;
+      margin-top: 1em;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Grocery Shop</h1>
+  </header>
+  <div class="container">
+    <h2>Products</h2>
+    <div class="products">
+      <div class="product" data-name="Apples" data-price="2">
+        <img src="https://img.icons8.com/color/96/000000/apple.png" alt="Apples">
+        <div class="product-name">Apples</div>
+        <div class="product-price">$2 / kg</div>
+        <button class="add-to-cart">Add to Cart</button>
+      </div>
+      <div class="product" data-name="Bananas" data-price="1.5">
+        <img src="https://img.icons8.com/color/96/000000/banana.png" alt="Bananas">
+        <div class="product-name">Bananas</div>
+        <div class="product-price">$1.5 / kg</div>
+        <button class="add-to-cart">Add to Cart</button>
+      </div>
+      <div class="product" data-name="Tomatoes" data-price="3">
+        <img src="https://img.icons8.com/color/96/000000/tomato.png" alt="Tomatoes">
+        <div class="product-name">Tomatoes</div>
+        <div class="product-price">$3 / kg</div>
+        <button class="add-to-cart">Add to Cart</button>
+      </div>
+      <div class="product" data-name="Milk" data-price="1">
+        <img src="https://img.icons8.com/color/96/000000/milk-bottle.png" alt="Milk">
+        <div class="product-name">Milk</div>
+        <div class="product-price">$1 / litre</div>
+        <button class="add-to-cart">Add to Cart</button>
+      </div>
+      <div class="product" data-name="Bread" data-price="2.5">
+        <img src="https://img.icons8.com/color/96/000000/bread.png" alt="Bread">
+        <div class="product-name">Bread</div>
+        <div class="product-price">$2.5 / loaf</div>
+        <button class="add-to-cart">Add to Cart</button>
+      </div>
+    </div>
+    <div class="cart">
+      <h2>Your Cart</h2>
+      <ul class="cart-items"></ul>
+      <div class="total">Total: $0</div>
+    </div>
+  </div>
+  <script>
+    const cart = {};
+    const cartItemsList = document.querySelector('.cart-items');
+    const totalDisplay = document.querySelector('.total');
+    document.querySelectorAll('.add-to-cart').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const product = this.parentElement;
+        const name = product.getAttribute('data-name');
+        const price = parseFloat(product.getAttribute('data-price'));
+        if (cart[name]) {
+          cart[name].qty += 1;
+        } else {
+          cart[name] = { price, qty: 1 };
+        }
+        updateCart();
+      });
+    });
+
+    function updateCart() {
+      cartItemsList.innerHTML = '';
+      let total = 0;
+      Object.keys(cart).forEach(name => {
+        const item = cart[name];
+        const itemTotal = item.price * item.qty;
+        total += itemTotal;
+        const li = document.createElement('li');
+        li.textContent = `${name} x ${item.qty} = $${itemTotal.toFixed(2)}`;
+        cartItemsList.appendChild(li);
+      });
+      totalDisplay.textContent = `Total: $${total.toFixed(2)}`;
+    }
+  </script>
+</body>
+</html>
